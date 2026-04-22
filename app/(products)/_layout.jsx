@@ -1,14 +1,12 @@
 import { useEffect } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { Redirect, Stack } from 'expo-router';
-
 import { useAuthStore } from '@/lib/stores/useAuthStore';
-import LogoutIconButton from '@/components/auth/LogoutIconButton';
-import Colors from '@/lib/colors';
+import { useThemeColor } from '@/lib/hooks/useThemeColor';
 
 const CheckAuthenticationLayout = () => {
   const { status, checkStatus } = useAuthStore();
-  const backgroundColor = Colors.background;
+  const { background, card, primary } = useThemeColor();
 
   useEffect(() => {
     checkStatus();
@@ -21,16 +19,15 @@ const CheckAuthenticationLayout = () => {
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-          marginBottom: 5,
+          backgroundColor: background
         }}
       >
-        <ActivityIndicator />
+        <ActivityIndicator color={primary} size="large" />
       </View>
     );
   }
 
   if (status === 'unauthenticated') {
-    // Guardar la ruta del usuario
     return <Redirect href="/auth/login" />;
   }
 
@@ -39,18 +36,18 @@ const CheckAuthenticationLayout = () => {
       screenOptions={{
         headerShadowVisible: false,
         headerStyle: {
-          backgroundColor: backgroundColor,
+          backgroundColor: card,
         },
+        headerTintColor: primary,
         contentStyle: {
-          backgroundColor: backgroundColor,
+          backgroundColor: background,
         },
       }}
     >
       <Stack.Screen
         name="index"
         options={{
-          title: 'Productos',
-          headerLeft: () => <LogoutIconButton />,
+          headerShown: false,
         }}
       />
 
@@ -64,3 +61,4 @@ const CheckAuthenticationLayout = () => {
   );
 };
 export default CheckAuthenticationLayout;
+

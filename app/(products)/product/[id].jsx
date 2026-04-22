@@ -6,6 +6,7 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  StyleSheet,
 } from 'react-native';
 import {
   Redirect,
@@ -22,12 +23,13 @@ import CustomButton from '@/components/CustomButton';
 import { Formik } from 'formik';
 import CameraIconButton from '@/components/CameraIconButton';
 import { useCameraStore } from '@/lib/stores/useCameraStore';
-
-
+import { useThemeColor } from '@/lib/hooks/useThemeColor';
+import { CustomText } from '@/components/CustomText';
 
 
 const ProductScreen = () => {
   const { selectedImages, clearImages } = useCameraStore();
+  const { background, primary, card, secondary } = useThemeColor();
 
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
@@ -42,6 +44,10 @@ const ProductScreen = () => {
 
   useEffect(() => {
     navigation.setOptions({
+      headerShown: true,
+      headerTitle: id === 'new' ? 'Nuevo Producto' : 'Detalles',
+      headerStyle: { backgroundColor: card },
+      headerTintColor: primary,
       headerRight: () => (
         <CameraIconButton
           onPress={() => router.push('/camera')}
@@ -49,16 +55,16 @@ const ProductScreen = () => {
         />
       ),
     });
-  }, []);
+  }, [id, card, primary]);
 
 
   useEffect(() => {
-    if (productQuery.data) {
+    if (productQuery.data && id !== 'new') {
       navigation.setOptions({
         title: productQuery.data.title,
       });
     }
-  }, [productQuery.data]);
+  }, [productQuery.data, id]);
 
 
   const onDeleteProduct = () => {
@@ -81,12 +87,10 @@ const ProductScreen = () => {
   };
 
 
-
-
   if (productQuery.isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size={30} />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: background }}>
+        <ActivityIndicator size="large" color={primary} />
       </View>
     );
   }
@@ -115,76 +119,76 @@ const ProductScreen = () => {
       {({ values, handleSubmit, handleChange, setFieldValue }) => (
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1, backgroundColor: background }}
         >
-          <ScrollView>
-            <ProductImages images={[...values.images, ...selectedImages]} />
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={{ backgroundColor: '#fff' }}>
+               <ProductImages images={[...values.images, ...selectedImages]} />
+            </View>
 
-            <CustomView style={{ marginHorizontal: 10, marginTop: 20 }}>
+            <View style={styles.content}>
+              <CustomText type="subtitle" style={{ marginBottom: 15 }}>Información General</CustomText>
+              
               <CustomTextInput
-                placeholder="Título"
-                style={{ marginVertical: 5 }}
+                placeholder="Título del producto"
+                icon="text-outline"
                 value={values.title}
                 onChangeText={handleChange('title')}
               />
 
               <CustomTextInput
-                placeholder="Slug"
-                style={{ marginVertical: 5 }}
+                placeholder="Slug (identificador único)"
+                icon="link-outline"
                 value={values.slug}
                 onChangeText={handleChange('slug')}
               />
 
               <CustomTextInput
-                placeholder="Descripción"
+                placeholder="Descripción detallada"
                 multiline
-                numberOfLines={5}
-                style={{ marginVertical: 5 }}
+                numberOfLines={4}
+                icon="document-text-outline"
+                style={{ height: 120, alignItems: 'flex-start' }}
                 value={values.description}
                 onChangeText={handleChange('description')}
               />
-            </CustomView>
 
-            <CustomView
-              style={{
-                marginHorizontal: 10,
-                marginVertical: 5,
-                flexDirection: 'row',
-                gap: 10,
-              }}
-            >
-              <CustomTextInput
-                placeholder="Precio"
-                style={{ flex: 1 }}
-                value={values.price.toString()}
-                onChangeText={handleChange('price')}
-              />
-              <CustomTextInput
-                placeholder="Inventario"
-                style={{ flex: 1 }}
-                value={values.stock.toString()}
-                onChangeText={handleChange('stock')}
-              />
-            </CustomView>
+              <View style={{ flexDirection: 'row', gap: 15, marginTop: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <CustomText style={styles.label}>Precio</CustomText>
+                  <CustomTextInput
+                    placeholder="0.00"
+                    keyboardType="numeric"
+                    icon="cash-outline"
+                    value={values.price.toString()}
+                    onChangeText={handleChange('price')}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <CustomText style={styles.label}>Stock</CustomText>
+                  <CustomTextInput
+                    placeholder="0"
+                    keyboardType="numeric"
+                    icon="cube-outline"
+                    value={values.stock.toString()}
+                    onChangeText={handleChange('stock')}
+                  />
+                </View>
+              </View>
 
-            <CustomView
-              style={{
-                marginHorizontal: 10,
-              }}
-            >
+              <CustomText style={[styles.label, { marginTop: 20 }]}>Tallas Disponibles</CustomText>
               <CustomButtonGroup
                 options={['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']}
                 selectedOptions={values.sizes}
                 onSelect={(selectedSize) => {
-                  const newSizesValue = values.sizes.includes(
-                    selectedSize
-                  )
+                  const newSizesValue = values.sizes.includes(selectedSize)
                     ? values.sizes.filter((s) => s !== selectedSize)
                     : [...values.sizes, selectedSize];
-
                   setFieldValue('sizes', newSizesValue);
                 }}
               />
 
+              <CustomText style={[styles.label, { marginTop: 20 }]}>Categoría</CustomText>
               <CustomButtonGroup
                 options={['kid', 'men', 'women', 'unisex']}
                 selectedOptions={[values.gender]}
@@ -192,36 +196,51 @@ const ProductScreen = () => {
                   setFieldValue('gender', selectedOption)
                 }
               />
-            </CustomView>
 
+              <View style={{ marginTop: 40, gap: 15, marginBottom: 50 }}>
+                <CustomButton
+                  icon="save-outline"
+                  onPress={() => handleSubmit()}
+                  isLoading={productMutation.isPending}
+                >
+                  {id === 'new' ? 'Crear Producto' : 'Guardar Cambios'}
+                </CustomButton>
 
-            {/* GUARDAR */}
-            <View style={{ marginHorizontal: 10, marginTop: 20 }}>
-              <CustomButton
-                icon="save-outline"
-                onPress={() => handleSubmit()}
-                isLoading={productMutation.isPending}
-              >
-                Guardar
-              </CustomButton>
+                {id !== 'new' && (
+                  <CustomButton
+                    icon="trash-outline"
+                    onPress={onDeleteProduct}
+                    isLoading={deleteMutation.isPending}
+                    style={{ backgroundColor: secondary }}
+                  >
+                    Eliminar Producto
+                  </CustomButton>
+                )}
+              </View>
             </View>
-
-            {/* BOTÓN BORRAR */}
-            <View style={{ marginHorizontal: 10, marginBottom: 80, marginTop: 15 }}>
-              <CustomButton
-                icon="trash-outline"
-                onPress={onDeleteProduct}
-                isLoading={deleteMutation.isPending}
-                style={{ backgroundColor: '#ff3b30' }}
-              >
-                Borrar producto
-              </CustomButton>
-            </View>
-
           </ScrollView>
         </KeyboardAvoidingView>
       )}
     </Formik>
   );
 };
+
+const styles = StyleSheet.create({
+  content: {
+    padding: 20,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: -30,
+    backgroundColor: 'transparent',
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+    opacity: 0.7,
+  },
+});
+
 export default ProductScreen;
+
+

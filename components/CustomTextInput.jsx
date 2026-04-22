@@ -4,13 +4,12 @@ import {
   StyleSheet,
   TextInput,
 } from 'react-native';
-import Colors from '@/lib/colors';
+import { useThemeColor } from '@/lib/hooks/useThemeColor';
 import { useRef, useState } from 'react';
 
 
 const CustomTextInput = ({ icon, style, ...rest }) => {
-  const primaryColor = Colors.primary;
-  const textColor = Colors.text;
+  const { primary, text, border, placeholder, card } = useThemeColor();
 
   const [isActive, setIsActive] = useState(false);
   const inputRef = useRef(null);
@@ -19,8 +18,9 @@ const CustomTextInput = ({ icon, style, ...rest }) => {
     <View
       style={[
         {
-          ...styles.border,
-          borderColor: isActive ? primaryColor : '#ccc',
+          ...styles.container,
+          backgroundColor: card,
+          borderColor: isActive ? primary : border,
         },
         style,
       ]}
@@ -29,20 +29,20 @@ const CustomTextInput = ({ icon, style, ...rest }) => {
       {icon && (
         <Ionicons
           name={icon}
-          size={24}
-          color={textColor}
-          style={{ marginRight: 10 }}
+          size={20}
+          color={isActive ? primary : placeholder}
+          style={{ marginRight: 12 }}
         />
       )}
 
       <TextInput
         ref={inputRef}
-        placeholderTextColor="#5c5c5c"
+        placeholderTextColor={placeholder}
         onFocus={() => setIsActive(true)}
         onBlur={() => setIsActive(false)}
         style={{
-          color: textColor,
-          marginRight: 10,
+          color: text,
+          fontSize: 16,
           flex: 1,
         }}
         {...rest}
@@ -56,13 +56,17 @@ export default CustomTextInput;
 
 
 
+
+
 const styles = StyleSheet.create({
-  border: {
+  container: {
     borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 16,
     flexDirection: 'row',
     alignItems: 'center',
   },
 });
+

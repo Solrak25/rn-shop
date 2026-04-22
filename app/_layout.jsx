@@ -7,7 +7,7 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import Colors from '@/lib/colors';
+import { useThemeColor } from '@/lib/hooks/useThemeColor';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -22,10 +22,9 @@ const queryClient = new QueryClient({
 
 
 export default function RootLayout() {
-
+  const { background } = useThemeColor();
 
   const [loaded] = useFonts({
-    // SpaceMono: require('@/assets/fonts/SpaceMono-Regular.ttf'),
     KanitRegular: require('@/assets/fonts/Kanit-Regular.ttf'),
     KanitBold: require('@/assets/fonts/Kanit-Bold.ttf'),
     KanitThin: require('@/assets/fonts/Kanit-Thin.ttf'),
@@ -42,7 +41,7 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ backgroundColor: Colors.background, flex: 1 }} >
+    <GestureHandlerRootView style={{ backgroundColor: background, flex: 1 }} >
 
       <QueryClientProvider client={queryClient}>
 
@@ -53,3 +52,4 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+

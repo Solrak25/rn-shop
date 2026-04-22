@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
-import Colors from '@/lib/colors';
+import { useThemeColor } from '@/lib/hooks/useThemeColor';
 
 
 const CustomButton = ({ children, icon, isLoading, style, ...rest }) => {
-  const primaryColor = Colors.primary;
+  const { primary } = useThemeColor();
 
   return (
     <Pressable
@@ -12,9 +12,11 @@ const CustomButton = ({ children, icon, isLoading, style, ...rest }) => {
       style={({ pressed }) => [
         styles.button,
         {
-          backgroundColor: primaryColor,
-          opacity: pressed || isLoading ? 0.85 : 1,
+          backgroundColor: primary,
+          opacity: pressed || isLoading ? 0.9 : 1,
           transform: [{ scale: pressed ? 0.98 : 1 }],
+          elevation: pressed ? 2 : 4,
+          shadowOpacity: pressed ? 0.1 : 0.2,
         },
         style,
       ]}
@@ -24,14 +26,14 @@ const CustomButton = ({ children, icon, isLoading, style, ...rest }) => {
         <ActivityIndicator color="white" />
       ) : (
         <>
-          <Text style={{ color: 'white' }}>{children}</Text>
+          <Text style={styles.text}>{children}</Text>
 
           {icon && (
             <Ionicons
               name={icon}
-              size={24}
+              size={20}
               color="white"
-              style={{ marginHorizontal: 5 }}
+              style={{ marginLeft: 8 }}
             />
           )}
         </>
@@ -41,15 +43,24 @@ const CustomButton = ({ children, icon, isLoading, style, ...rest }) => {
 };
 export default CustomButton;
 
-
-
 const styles = StyleSheet.create({
   button: {
-    paddingHorizontal: 10,
-    paddingVertical: 15,
-    borderRadius: 5,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
   },
+  text: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  }
 });
+
+

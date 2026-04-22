@@ -5,24 +5,28 @@ import {
   ScrollView,
   useWindowDimensions,
   View,
+  TouchableOpacity,
+  Platform,
 } from 'react-native';
 
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import CustomButton from '@/components/CustomButton';
 import { CustomText } from '@/components/CustomText';
 import CustomTextInput from '@/components/CustomTextInput';
-import Colors from '@/lib/colors';
 import { useAuthStore } from '@/lib/stores/useAuthStore';
+import { useThemeStore } from '@/lib/stores/useThemeStore';
+import { useThemeColor } from '@/lib/hooks/useThemeColor';
 import { Link } from 'expo-router';
-
 
 
 const LoginScreen = () => {
   const { login } = useAuthStore();
+  const { theme, toggleTheme } = useThemeStore();
+  const { background, tint, placeholder } = useThemeColor();
 
   const { height } = useWindowDimensions();
-  const backgroundColor = Colors.background;
 
   const [isPosting, setIsPosting] = useState(false);
   const [form, setForm] = useState({
@@ -33,9 +37,8 @@ const LoginScreen = () => {
   const onLogin = async () => {
     const { email, password } = form;
 
-    console.log({ email, password });
-
     if (email.length === 0 || password.length === 0) {
+      Alert.alert('Campos requeridos', 'Por favor ingrese su correo y contraseña');
       return;
     }
 
@@ -52,77 +55,91 @@ const LoginScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+      style={{ flex: 1, backgroundColor: background }}
+    >
       <ScrollView
-        style={{
-          paddingHorizontal: 40,
-          backgroundColor: backgroundColor,
-        }}
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
       >
-        <View
-          style={{
-            paddingTop: height * 0.35,
-          }}
-        >
-          <CustomText type="title">Ingresar</CustomText>
-          <CustomText style={{ color: 'grey' }}>
-            Por favor ingrese para continuar
-          </CustomText>
-        </View>
+        <View style={{ paddingHorizontal: 32, paddingBottom: 40 }}>
+          <View style={{ 
+            flexDirection: 'row', 
+            justifyContent: 'flex-end', 
+            marginTop: 40 
+          }}>
+            <TouchableOpacity 
+              onPress={toggleTheme}
+              style={{
+                padding: 10,
+                borderRadius: 50,
+                backgroundColor: theme === 'light' ? '#eee' : '#333'
+              }}
+            >
+              <Ionicons 
+                name={theme === 'light' ? 'moon' : 'sunny'} 
+                size={24} 
+                color={tint} 
+              />
+            </TouchableOpacity>
+          </View>
 
-        {/* Email y Password */}
-        <View style={{ marginTop: 20 }}>
-          <CustomTextInput
-            placeholder="Correo electrónico"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            icon="mail-outline"
-            value={form.email}
-            onChangeText={(value) => setForm({ ...form, email: value })}
-          />
+          <View style={{ marginTop: height * 0.1 }}>
+            <CustomText type="title" style={{ fontSize: 40, marginBottom: 8 }}>Bienvenido</CustomText>
+            <CustomText style={{ color: placeholder, fontSize: 18 }}>
+              Ingresa para continuar con tus compras
+            </CustomText>
+          </View>
 
-          <CustomTextInput
-            placeholder="Contraseña"
-            secureTextEntry
-            autoCapitalize="none"
-            icon="lock-closed-outline"
-            value={form.password}
-            onChangeText={(value) => setForm({ ...form, password: value })}
-          />
-        </View>
+          <View style={{ marginTop: 40 }}>
+            <CustomTextInput
+              placeholder="Correo electrónico"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              icon="mail-outline"
+              value={form.email}
+              onChangeText={(value) => setForm({ ...form, email: value })}
+            />
 
-        {/* Spacer */}
-        <View style={{ marginTop: 10 }} />
+            <CustomTextInput
+              placeholder="Contraseña"
+              secureTextEntry
+              autoCapitalize="none"
+              icon="lock-closed-outline"
+              value={form.password}
+              onChangeText={(value) => setForm({ ...form, password: value })}
+            />
+          </View>
 
-        {/* Botón */}
-        <CustomButton
-          icon="arrow-forward-outline"
-          onPress={onLogin}
-          disabled={isPosting}
-        >
-          Ingresar
-        </CustomButton>
+          <CustomButton
+            icon="arrow-forward-outline"
+            onPress={onLogin}
+            isLoading={isPosting}
+          >
+            Ingresar
+          </CustomButton>
 
-        {/* Spacer */}
-        <View style={{ marginTop: 50 }} />
-
-        {/* Enlace a registro */}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <CustomText>¿No tienes cuenta?</CustomText>
-
-          <Link href="/auth/register" style={{ color: '#3D64F4', marginHorizontal: 5 }}>
-            Crear cuenta
-          </Link>
-
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: 'auto',
+              paddingTop: 40
+            }}
+          >
+            <CustomText>¿No tienes cuenta? </CustomText>
+            <Link href="/auth/register" style={{ color: tint, fontWeight: 'bold' }}>
+              Regístrate aquí
+            </Link>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
+
 export default LoginScreen;
+
+

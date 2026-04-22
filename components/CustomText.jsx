@@ -1,24 +1,22 @@
 import { Text, StyleSheet } from 'react-native';
-import Colors from '@/lib/colors';
-
-
+import { useThemeColor } from '@/lib/hooks/useThemeColor';
 
 export function CustomText({
   style,
-  type = 'default', // 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+  type = 'default',
   ...rest
 }) {
-  const color = Colors.text;
+  const { text: textColor, tint: tintColor } = useThemeColor();
 
   return (
     <Text
       style={[
-        { color },
+        { color: textColor },
         type === 'default' ? styles.default : undefined,
         type === 'title' ? styles.title : undefined,
         type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
         type === 'subtitle' ? styles.subtitle : undefined,
-        type === 'link' ? styles.link : undefined,
+        type === 'link' ? [styles.link, { color: tintColor }] : undefined,
         style,
       ]}
       {...rest}

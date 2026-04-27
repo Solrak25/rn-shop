@@ -42,11 +42,12 @@
         "origin": false
       },
       "eas": {
-        "projectId": "60d2c841-267a-47ce-94bb-e760fee6a279"
+        "projectId": "4e78be5b-9c5b-48ff-9fcb-d729022b63ae"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
-    }
+    },
+    "owner": "solrak"
   }
 }
